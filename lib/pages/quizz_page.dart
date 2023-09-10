@@ -1,11 +1,11 @@
 import 'package:ashresume/Services/http.service.dart';
+import 'package:ashresume/pages/quiz.result.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class QuizScreen extends StatefulWidget {
   final String summaryId;
+
   const QuizScreen({required this.summaryId});
 
   @override
@@ -14,8 +14,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   List<dynamic> questions = [];
-  Map<int, int> selectedAnswers =
-      {}; // Initialize selectedAnswers as an empty Map
+  Map<int, int> selectedAnswers = {};
   HttpService _httpService = Get.put(HttpService());
 
   Future<List<dynamic>> fetchData() async {
@@ -53,11 +52,20 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
+  void showResultsScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuizResultScreen(selectedAnswers: selectedAnswers),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('questions'),
+        title: Text('Questions'),
       ),
       body: ListView.builder(
         itemCount: questions.length,
@@ -78,8 +86,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 dynamic answerChoice = entry.value;
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor:
-                        getCheckBoxColor(questionIndex, choiceIndex),
+                    backgroundColor: getCheckBoxColor(questionIndex, choiceIndex),
                     child: IconButton(
                       icon: Icon(
                         Icons.check,
@@ -100,6 +107,21 @@ class _QuizScreenState extends State<QuizScreen> {
           );
         },
       ),
+      floatingActionButton: Container(
+        width: 180,
+        height: 60,
+        child: FloatingActionButton(
+          onPressed: showResultsScreen,
+          child: Text('View results'),
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
     );
   }
 }
+
