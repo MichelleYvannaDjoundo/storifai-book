@@ -2,6 +2,7 @@ import 'package:ashresume/pages/quizz_page.dart';
 import 'package:ashresume/pages/reading_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:share/share.dart';
 
 import 'globals.dart';
 import 'home.dart';
@@ -26,6 +27,11 @@ class _DetailsPageState extends State<DetailsPage> {
   List<String> timeOptions = ['03 min', '05 min', '15 min', '01 hr'];
   List<String> languageOptions = ['French', 'English', 'Spanish'];
 
+  Future<void> shareApp() async {
+    final String appLink = 'https://play.google.com/store/apps/details?id=com.example.myapp';
+    final String message = 'Check out my new app: $appLink';
+    await Share.share('Share App: $message');
+  }
   @override
   Widget build(BuildContext context) {
     List<Widget> keyTiles = [];
@@ -53,10 +59,10 @@ class _DetailsPageState extends State<DetailsPage> {
                       ),
                       TextSpan(
                         text:
-                            ' $name', // Print the value of the "name" attribute
+                            ' $name',
                         style: TextStyle(
-                          color: Colors.black, // Apply black color to the name
-                          fontSize: 18, // Adjust the font size as desired
+                          color: Colors.black, 
+                          fontSize: 18, 
                         ),
                       ),
                     ],
@@ -74,12 +80,12 @@ class _DetailsPageState extends State<DetailsPage> {
                   );
                 },
               ),
-              Divider(height: 1), // Add a Divider widget
+              Divider(height: 1), 
             ],
           ),
         ),
       );
-      index++; // Increment the index counter
+      index++;
     }
 
     return Scaffold(
@@ -137,7 +143,7 @@ class _DetailsPageState extends State<DetailsPage> {
                               Icons.share,
                             ),
                             onPressed: () {
-                              // Handle sharing logic here
+                              shareApp();
                             },
                           ),
                         ),

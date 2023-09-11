@@ -4,14 +4,14 @@ import 'package:get/route_manager.dart';
 
 import 'Auth/login_page.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileScreen1 extends StatefulWidget {
+  const ProfileScreen1({Key? key}) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen1> createState() => _ProfileScreen1State();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreen1State extends State<ProfileScreen1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
                 );
               },
               child: Text("Please login")

@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
     LibraryScreen(
       addedToLib: addedToLib,
     ),
-    ProfileScreen(),
+    ProfileScreen1(),
   ];
 
   @override
@@ -438,10 +438,10 @@ class ImageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => DetailsPage(item: item)),
-        );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => DetailsPage(item: item)),
+      );
       },
       child: SizedBox(
         width: 200,
