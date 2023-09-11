@@ -1,303 +1,141 @@
-/* import 'package:amplify_api/amplify_api.dart';
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:ashlife/Screen/Auth/phoneverif.dart';
-import 'package:ashlife/models/ModelProvider.dart';
-import 'package:ashlife/services/http.service.dart';
-import 'package:ashlife/widgets/image.dart';
-import 'package:ashlife/widgets/widgets.dart';
-import 'package:email_validator/email_validator.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:lite_rolling_switch/lite_rolling_switch.dart';
-import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Register extends StatefulWidget {
-  const Register({super.key});
-
+class RegistrationScreen extends StatelessWidget {
   @override
-  State<Register> createState() => _RegisterState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('User Registration'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: RegistrationForm(),
+        ),
+      ),
+    );
+  }
+}
+class RegistrationForm extends StatefulWidget {
+  @override
+  _RegistrationFormState createState() => _RegistrationFormState();
 }
 
-class _RegisterState extends State<Register> {
-  bool isSignUpComplete = false;
-  bool isLoadingSignup = false;
-  bool isLoading = false;
+class _RegistrationFormState extends State<RegistrationForm> {
+  final _formKey = GlobalKey<FormState>(); // Key to validate the form
 
-  final HttpService _httpService = Get.put(HttpService());
-  final phoneNumberController = TextEditingController();
-  final nameController = TextEditingController();
-  final sexeController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final cpasswordController = TextEditingController();
+  // Text editing controllers for form fields
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    phoneNumberController.dispose();
-    nameController.dispose();
-    sexeController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    cpasswordController.dispose();
-
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> signUpUser() async {
-    try {
-      setState(() {
-        isLoadingSignup = true;
-      });
-      if (emailController.text.isEmpty ||
-          nameController.text.isEmpty ||
-          sexeController.text.isEmpty ||
-          phoneNumberController.text.isEmpty ||
-          passwordController.text.isEmpty) {
-        Get.snackbar('Error', 'Please fill all data');
-        setState(() {
-          isLoadingSignup = false;
-          isSignUpComplete = false;
-        });
-        return;
-      }
+  void _registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      // Validate the form fields
+      String name = _nameController.text;
+      String email = _emailController.text;
+      String password = _passwordController.text;
 
-      if (passwordController.text != cpasswordController.text) {
-        Get.snackbar('Error', "The password doesn't not match !!!");
-        setState(() {
-          isLoadingSignup = false;
-          isSignUpComplete = false;
-        });
-        return;
-      }
-
-      if (!EmailValidator.validate(emailController.text)) {
-        Get.snackbar('Error', "Please fill valid email address !!");
-        setState(() {
-          isLoadingSignup = false;
-          isSignUpComplete = false;
-        });
-        return;
-      }
-
-      final userAttributes = <CognitoUserAttributeKey, String>{
-        CognitoUserAttributeKey.email: emailController.text,
-        CognitoUserAttributeKey.name: nameController.text,
-        CognitoUserAttributeKey.gender: sexeController.text,
-        CognitoUserAttributeKey.phoneNumber: phoneNumberController.text,
-        // additional attributes as needed
+      var url = Uri.parse('https://192.168.7.49:8000/account/auth');
+      // Create a JSON payload to send to the backend
+      Map<String, dynamic> data = {
+        'name': name,
+        'email': email,
+        'password': password,
       };
-      final result = await Amplify.Auth.signUp(
-        username: phoneNumberController.text,
-        password: passwordController.text,
-        options: CognitoSignUpOptions(userAttributes: userAttributes),
+
+      // Send registration request to the backend API
+      var response = await http.post(url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode(data),
       );
 
-      final dataSetResult =
-          await _httpService.post('datasets', {'name': nameController.text});
-      final datasetId = dataSetResult["insert_datasets_one"]["id"];
-
-
-      final user = User(
-          name: nameController.text,
-          phone: phoneNumberController.text,
-          email: emailController.text,
-          datasetId: datasetId);
-
-      final request = ModelMutations.update(user);
-      await Amplify.API.mutate(request:request);
-
-      setState(() {
-        isLoadingSignup = false;
-        isSignUpComplete = result.isSignUpComplete;
-      });
-
-      Get.to(
-          Phoneverif(
-            title: 'Phone number verification',
-            phoneNumber: phoneNumberController.text,
-            nextRoute: '/login',
-            type: 'register',
+      if (response.statusCode == 200) {
+        // Registration successful
+        // Display a success message or navigate to the login screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration successful!'),
           ),
-          transition: Transition.fade,
-          duration: const Duration(seconds: 1));
-    } on AmplifyException catch (e) {
-      setState(() {
-        isLoadingSignup = false;
-      });
-      Get.snackbar(
-        'Error',
-        e.message,
-      );
+        );
+      } else {
+        // Registration failed
+        // Display an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration failed. Please try again.'),
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.light,
-      ),
-      child: Stack(
-        children: <Widget>[
-          const AuthBackground(),
-          Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SafeArea(
-                child: Column(children: <Widget>[
-              AshlifeImage(
-                  height: size.height * 0.15,
-                  width: size.width * 0.25,
-                  path: 'assets/logo/brand.png'),
-              const SizedBox(
-                height: 10,
-              ),
-              Text(
-                'sign_up'.tr,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                  child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: SingleChildScrollView(
-                  child: Column(children: <Widget>[
-                    PhoneNumberInput(
-                      controller: phoneNumberController,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    InputField(
-                      text: 'lbl_name'.tr,
-                      hintText: "lbl_name".tr,
-                      icon: Icons.person_2_sharp,
-                      controller: nameController,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    InputField(
-                      text: 'lbl_email'.tr,
-                      hintText: "lbl_email".tr,
-                      icon: Icons.email,
-                      controller: emailController,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    PasswordField(
-                      text: "lbl_password".tr,
-                      hintText: "lbl_password".tr,
-                      controller: passwordController,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    PasswordField(
-                      text: "lbl_cpassword".tr,
-                      hintText: "lbl_cpassword".tr,
-                      controller: cpasswordController,
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(children: <Widget>[
-                      LiteRollingSwitch(
-                        value: true,
-                        textOn: 'txt_male'.tr,
-                        textOff: 'txt_female'.tr,
-                        colorOn: const Color(0xff253890),
-                        textOffColor: Colors.white,
-                        textOnColor: Colors.white,
-                        colorOff: const Color(0xff050B29),
-                        iconOn: Icons.male,
-                        iconOff: Icons.female,
-                        textSize: 16.0,
-                        onChanged: (bool state) {
-                          //Use it to manage the different states
-                          if (kDebugMode) {
-                            print('Current State of SWITCH IS: $state');
-                          }
-                          if (state) {
-                            sexeController.text = "male";
-                          } else {
-                            sexeController.text = "female";
-                          }
-                        },
-                        onDoubleTap: () {
-                          //log here
-                        },
-                        onTap: () {
-                          //log here
-                        },
-                        onSwipe: () {
-                          //log here
-                        },
-                      ),
-                    ]),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    CustomButton(
-                      text: 'sign_up'.tr,
-                      textColor: Colors.white,
-                      color: const Color(0xff253890),
-                      isLoading: isLoadingSignup,
-                      pressed: () {
-                        signUpUser();
-                      },
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    const OrSeparator(),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    CustomIconButton(
-                      text: 'fb_signup'.tr,
-                      textColor: Colors.white,
-                      color: const Color(0xff253890),
-                      icon: Icons.facebook,
-                      isLoading: isLoading,
-                      pressed: () {
-                        if (kDebugMode) {
-                          print("Sign in with Facebook button pressed");
-                        }
-                      },
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    TextLink(
-                      text: "have_account".tr,
-                      textLink: 'sign_in'.tr,
-                      pressed: () {
-                        if (kDebugMode) {
-                          print('Sign in link pressed');
-                        }
-                        Get.back();
-                      },
-                    )
-                  ]),
-                ),
-              ))
-            ])),
-          )
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _nameController,
+            decoration: InputDecoration(labelText: 'Name'),
+            // Add form field validation
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter your name';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _emailController,
+            decoration: InputDecoration(labelText: 'Email'),
+            // Add form field validation for email
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter your email';
+              }
+              if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                  .hasMatch(value!)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _passwordController,
+            decoration: InputDecoration(labelText: 'Password'),
+            obscureText: true,
+            // Add form field validation for password
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter your password';
+              }
+              if (value.length < 8) {
+                return 'Password should be at least 8 characters long';
+              }
+              if (!RegExp(r'^(?=.*?[0-9]).{8,}$').hasMatch(value)) {
+                return 'Password should contain at least one number';
+              }
+              return null;
+            },
+          ),
+          ElevatedButton(
+            child: Text('Register'),
+            onPressed: _registerUser,
+          ),
         ],
       ),
     );
   }
 }
- */

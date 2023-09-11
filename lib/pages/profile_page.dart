@@ -1,3 +1,4 @@
+import 'package:ashresume/pages/Auth/register.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/route_manager.dart';
@@ -44,7 +45,7 @@ class _ProfileScreen1State extends State<ProfileScreen1> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  MaterialPageRoute(builder: (context) => RegistrationScreen()),
                 );
               },
               child: Text("Please login")
