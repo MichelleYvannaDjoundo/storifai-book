@@ -1,4 +1,123 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class LoginScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('User Login'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: LoginForm(),
+        ),
+      ),
+    );
+  }
+}
+class LoginForm extends StatefulWidget {
+  @override
+  _LoginFormState createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _formKey = GlobalKey<FormState>(); // Key to validate the form
+
+  // Text editing controllers for form fields
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _loginUser() async {
+    if (_formKey.currentState!.validate()) {
+      // Validate the form fields
+      String email = _emailController.text;
+      String password = _passwordController.text;
+
+      // Create a JSON payload to send to the backend
+      Map<String, dynamic> data = {
+        'email': email,
+        'password': password,
+      };
+      var url = Uri.parse('http://192.168.7.49:8000/account/auth');
+      // Send login request to the backend API
+      var response = await http.post(url,headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful
+        // Display a success message or navigate to the home screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login successful!'),
+          ),
+        );
+      } else {
+        // Login failed
+        // Display an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed. Please try again.'),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _emailController,
+            decoration: InputDecoration(labelText: 'Email'),
+            // Add form field validation for email
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter your email';
+              }
+              if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                  .hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _passwordController,
+            decoration: InputDecoration(labelText: 'Password'),
+            obscureText: true,
+            // Add form field validation for password
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter your password';
+              }
+              return null;
+            },
+          ),
+          ElevatedButton(
+            child: Text('Login'),
+            onPressed: _loginUser,
+          ),
+        ],
+      ),
+    );
+  }
+}
+/* import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -119,3 +238,5 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+ */
+

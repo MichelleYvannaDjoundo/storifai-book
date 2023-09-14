@@ -1,6 +1,12 @@
+import 'package:ashresume/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../../controller/auth_controller.dart';
 
 class RegistrationScreen extends StatelessWidget {
   @override
@@ -18,6 +24,7 @@ class RegistrationScreen extends StatelessWidget {
     );
   }
 }
+
 class RegistrationForm extends StatefulWidget {
   @override
   _RegistrationFormState createState() => _RegistrationFormState();
@@ -39,43 +46,48 @@ class _RegistrationFormState extends State<RegistrationForm> {
     super.dispose();
   }
 
-  void _registerUser() async {
+  Future <void> _registerUser() async {
     if (_formKey.currentState!.validate()) {
-      // Validate the form fields
       String name = _nameController.text;
       String email = _emailController.text;
       String password = _passwordController.text;
+      print('=====NAME:$name =========EMAIL:$email ========PASSWORD:$password');
+      
+      var url = Uri.parse('http://192.168.7.49:8000/account/auth');
 
-      var url = Uri.parse('https://192.168.7.49:8000/account/auth');
-      // Create a JSON payload to send to the backend
       Map<String, dynamic> data = {
-        'name': name,
+        'username': name,
         'email': email,
         'password': password,
       };
 
-      // Send registration request to the backend API
-      var response = await http.post(url,
-        headers: {'Content-Type': 'application/json; charset=utf-8'},
-        body: jsonEncode(data),
-      );
+      try {
+        var response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(data),
+        );
+        print("===========HERE IS RESPONSE==========${response.body}");
+        print("===========HERE IS STATUS==========${response.statusCode}");
 
-      if (response.statusCode == 200) {
-        // Registration successful
-        // Display a success message or navigate to the login screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Registration successful!'),
-          ),
-        );
-      } else {
-        // Registration failed
-        // Display an error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Registration failed. Please try again.'),
-          ),
-        );
+        if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Registration successful!'),
+            ),
+          );
+          final authController = Get.find<AuthController>();
+          authController.setLoginStatus(LoginStatus.loggedIn);
+          Get.to(HomePage());
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Registration failed. Please try again.'),
+            ),
+          );
+        }
+      } catch (e) {
+        print(e);
       }
     }
   }
@@ -89,7 +101,6 @@ class _RegistrationFormState extends State<RegistrationForm> {
           TextFormField(
             controller: _nameController,
             decoration: InputDecoration(labelText: 'Name'),
-            // Add form field validation
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Please enter your name';
