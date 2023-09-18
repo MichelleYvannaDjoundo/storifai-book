@@ -18,6 +18,7 @@ class DetailsPage extends StatefulWidget {
 
 class _DetailsPageState extends State<DetailsPage> {
   bool isBookmarked = false;
+  int time = 0;
   double iconScale = 1.0;
   String? selectedAge;
   String? selectedTime;
@@ -28,10 +29,32 @@ class _DetailsPageState extends State<DetailsPage> {
   List<String> languageOptions = ['French', 'English', 'Spanish'];
 
   Future<void> shareApp() async {
-    final String appLink = 'https://play.google.com/store/apps/details?id=com.example.myapp';
+    final String appLink =
+        'https://play.google.com/store/apps/details?id=com.example.myapp';
     final String message = 'Check out my new app: $appLink';
     await Share.share('Share App: $message');
   }
+
+  Future<void> navigateToKeyPointScreen(int index) async {
+    int totalTimeSpent = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => KeyPointScreen(
+          keyPoints: widget.item.keyPoints,
+          index: index,
+        ),
+      ),
+    );
+    setState(() {
+      time += totalTimeSpent;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You read for: $time'),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> keyTiles = [];
@@ -58,29 +81,20 @@ class _DetailsPageState extends State<DetailsPage> {
                         ),
                       ),
                       TextSpan(
-                        text:
-                            ' $name',
+                        text: ' $name',
                         style: TextStyle(
-                          color: Colors.black, 
-                          fontSize: 18, 
+                          color: Colors.black,
+                          fontSize: 18,
                         ),
                       ),
                     ],
                   ),
                 ),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => KeyPointScreen(
-                        keyPoints: widget.item.keyPoints,
-                        index: i,
-                      ),
-                    ),
-                  );
+                  navigateToKeyPointScreen(i);
                 },
               ),
-              Divider(height: 1), 
+              Divider(height: 1),
             ],
           ),
         ),
@@ -245,10 +259,6 @@ class _DetailsPageState extends State<DetailsPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                // Rest of the code...
-                // ...
-                // Display the list of keypoints here
               ],
             ),
             Row(

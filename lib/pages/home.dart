@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     HomeScreen(),
     NewStoryScreen(),
     LibraryScreen(
-      addedToLib: addedToLib,
+      // addedToLib: addedToLib,
     ),
     ProfileScreen1(),
   ];
@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // await Future.delayed(Duration(seconds: 35));
       print('*' * 100);
       final data = await _httpService.getSummary();
-      // print(data);
+      print(data);
       return data;
     } catch (e) {
       print('An error occurred while fetching data: $e');

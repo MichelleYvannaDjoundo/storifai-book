@@ -1,3 +1,4 @@
+import 'package:ashresume/controller/auth_controller.dart';
 import 'package:ashresume/pages/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../../controller/auth_controller.dart';
 
 class RegistrationScreen extends StatelessWidget {
   @override
@@ -70,13 +70,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
         print("===========HERE IS RESPONSE==========${response.body}");
         print("===========HERE IS STATUS==========${response.statusCode}");
 
-        if (response.statusCode == 201) {
+        if (response.statusCode == 201) { 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Registration successful!'),
             ),
           );
-          final authController = Get.find<AuthController>();
+          final authController = Get.put(AuthController());
           authController.setLoginStatus(LoginStatus.loggedIn);
           Get.to(HomePage());
         } else {

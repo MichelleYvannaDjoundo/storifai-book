@@ -42,7 +42,7 @@ class UserController extends GetxController {
   Future<void> fetchUserInformation() async {
     print('========THIS IS ID============${user.value.id}');
     try {
-      var response = await http.get(Uri.parse('http://192.168.7.49:8000/account/auth/?id=${user.value.id}'));
+      var response = await http.get(Uri.parse('http://192.168.7.49:8000/account/auth${user.value.id}'));
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
 
@@ -50,7 +50,7 @@ class UserController extends GetxController {
         var username = data['username'];
         var email = data['email'];
         var lastLogin = DateTime.parse(data['last_login']);
-        var preferedCategories = List<String>.from(data['preferedCategories']);
+        var preferedCategories = List<String>.from(data['prefered_categories']);
         var favoriteBooks = List<String>.from(data['favorite_books']);
         var readingBooks = List<String>.from(data['reading_books']);
 
