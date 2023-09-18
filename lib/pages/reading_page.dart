@@ -19,11 +19,16 @@ class _KeyPointScreenState extends State<KeyPointScreen> {
   List<String> userNotes = [];
   Map<int, bool> highlightedSections = {};
 
+  late PageController _pageController;
+  double _progress = 0.0;
+
   @override
   void initState() {
     super.initState();
     stopwatch = Stopwatch();
     stopwatch.start();
+    _pageController = PageController(initialPage: widget.index);
+    _pageController.addListener(_updateProgress);
   }
 
   @override
@@ -31,7 +36,15 @@ class _KeyPointScreenState extends State<KeyPointScreen> {
     stopwatch.stop();
     totalTimeSpent += stopwatch.elapsedMilliseconds;
     stopwatch.reset();
-    super.dispose();    
+    _pageController.removeListener(_updateProgress);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _updateProgress() {
+    setState(() {
+      _progress = _pageController.page! / (widget.keyPoints.length - 1);
+    });
   }
 
   @override
@@ -89,26 +102,52 @@ class _KeyPointScreenState extends State<KeyPointScreen> {
       ),
       body: Container(
         color: backgroundColor,
-        child: PageView.builder(
-          itemCount: widget.keyPoints.length,
-          controller: PageController(initialPage: widget.index),
-          itemBuilder: (context, pageIndex) {
-            String selectedValue =
-                widget.keyPoints[pageIndex]["content"].toString();
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: SelectableText(
-                  '${widget.keyPoints[pageIndex]["name"]}: ${isHighlighted ? "* " : ""}$selectedValue',
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: themeBrightness == Brightness.light
-                          ? Colors.black
-                          : Colors.white),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: LinearProgressIndicator(
+                value: _progress,
+                minHeight: 10,
+                backgroundColor: Colors.grey,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                '${(_progress * 100).toStringAsFixed(2)}% Read',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            );
-          },
+            ),
+            Expanded(
+              child: PageView.builder(
+                itemCount: widget.keyPoints.length,
+                controller: _pageController,
+                itemBuilder: (context, pageIndex) {
+                  String selectedValue =
+                      widget.keyPoints[pageIndex]["content"].toString();
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: SelectableText(
+                        '${widget.keyPoints[pageIndex]["name"]}: ${isHighlighted ? "* " : ""}$selectedValue',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: themeBrightness == Brightness.light
+                              ? Colors.black
+                              : Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

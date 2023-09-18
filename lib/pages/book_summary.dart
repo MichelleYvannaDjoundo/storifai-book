@@ -46,6 +46,10 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
     );
     setState(() {
+      print('==========TOTAL TIME SPENT========');
+      print(totalTimeSpent);
+      print('==========TOTAL TIME ========');
+      print(time);
       time += totalTimeSpent;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
