@@ -15,12 +15,14 @@ class _NoteScreenState extends State<NoteScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Note'),
-        actions: [IconButton(
-          icon: Icon(Icons.done),
-          onPressed: () {
-            String note = _textEditingController.text.trim();
-            Navigator.pop<String>(context, note);
-          },
+        actions: [
+          IconButton(
+            icon: Icon(Icons.done),
+            onPressed: () {
+              String note = _textEditingController.text.trim();
+              print('User entered note: $note');
+              Navigator.pop<String>(context, note);
+            },
           ),
         ],
       ),
@@ -31,7 +33,7 @@ class _NoteScreenState extends State<NoteScreen> {
           autofocus: true,
           maxLines: null,
           decoration: InputDecoration(
-          hintText: 'Enter your notes and remarks...',
+            hintText: 'Enter your notes and remarks...',
           ),
         ),
       ),

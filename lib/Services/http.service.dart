@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class HttpService {
-  String adress = 'http://192.168.23.49:8000';
+  String adress = 'http://192.168.12.49:8000';
 
   Future<List<dynamic>> getSummary() async {
     print("===========entered==================");
